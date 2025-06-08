@@ -77,8 +77,7 @@ weav is a smart scheduling app that seamlessly syncs availability and integrates
    pnpm dev
    ```
 
-6. **Open your browser**
-   Navigate to `http://localhost:3000`
+6. **Navigate to `http://localhost:3000`**
 
 ## License
 
