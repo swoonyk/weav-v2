@@ -1,5 +1,4 @@
 import {
-    addUserData,
     addFriendData,
     updateUserData,
     fetchUserProfileByEmail,
@@ -9,20 +8,6 @@ import { auth, clerkClient } from '@clerk/nextjs/server';
   
 // app/api/users/route.ts - For non-dynamic POST requests
 import { NextRequest, NextResponse } from 'next/server';
-
-// Simplified mock data for testing
-const mockUser = {
-  id: "1",
-  email: "test@example.com",
-  username: "testuser",
-  profilePic: "https://via.placeholder.com/150",
-  firstName: "Test",
-  lastName: "User",
-  is_vegetarian: true,
-  is_spicy: false,
-  is_family: true,
-  gcal_permission: false
-};
 
 export async function GET(request: NextRequest) {
   try {
@@ -95,8 +80,6 @@ export async function POST(request: NextRequest) {
       
       case 'profile': {
         // Handle profile update logic
-        const { userData } = body;
-        // Your profile update logic here
         return NextResponse.json({ success: true });
       }
       
@@ -121,8 +104,8 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     
-    const userData = await request.json();
-    const updatedUser = await updateUserData(userData);
+    const userDataFromBody = await request.json(); // Renamed to avoid conflict
+    await updateUserData(userDataFromBody);
     
     return NextResponse.json({
       success: true,

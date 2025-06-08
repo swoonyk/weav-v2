@@ -1,15 +1,27 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth, useUser } from '@clerk/nextjs';
 
-const FriendPage = (pid: string) => {
-  const [friends, setFriends] = useState<any[]>([]);
+interface Friend {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
+interface NewFriend {
+  userId: string | undefined;
+  targetEmail: string;
+}
+
+const FriendPage = () => {
+  const [friends, setFriends] = useState<Friend[]>([]);
   const [newFriendEmail, setNewFriendEmail] = useState('');
   const { getToken } = useAuth();
   const { isLoaded, user } = useUser();
 
-  const postFriendData = async (newFriend: any) => {
+  const postFriendData = async (newFriend: NewFriend): Promise<Friend> => {
     try {
       const token = await getToken();
       
@@ -31,7 +43,7 @@ const FriendPage = (pid: string) => {
     }
   };
 
-  const getFriendData = async (friendId?: string) => {
+  const getFriendData = useCallback(async (friendId?: string) => {
     try {
       // Make sure user is loaded before proceeding
       if (!isLoaded || !user) {
@@ -55,27 +67,27 @@ const FriendPage = (pid: string) => {
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
-      const data = await response.json();
+      const data: Friend[] = await response.json();
       setFriends(data);
     } catch (error) {
       console.error('Error getting friends:', error);
     }
-  };
+  }, [isLoaded, user, getToken]);
 
   useEffect(() => {
     if (isLoaded && user) {
       getFriendData();
     }
-  }, [isLoaded, user]);
+  }, [isLoaded, user, getFriendData]);
 
-  const handleAddFriend = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleAddFriend = async (e: React.FormEvent) => {
     e.preventDefault();
     const newFriend = { 
       userId: user?.id,
       targetEmail: newFriendEmail 
     };
     try {
-      const addedFriend = await postFriendData(newFriend);
+      const addedFriend: Friend = await postFriendData(newFriend);
       setFriends([...friends, addedFriend]);
       setNewFriendEmail('');
       (document.getElementById('my_modal_1') as HTMLDialogElement)?.close();
@@ -160,7 +172,7 @@ const FriendPage = (pid: string) => {
                       htmlFor="friendEmail" 
                       className="text-sm font-medium text-gray-700 mb-2"
                     >
-                      Enter your friend's email address
+                      Enter your friend&apos;s email address
                     </label>
                     <input
                       type="email"

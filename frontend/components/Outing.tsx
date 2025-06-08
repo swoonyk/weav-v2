@@ -3,7 +3,16 @@
 import React, { useState } from 'react';
 import { Calendar, Clock, Users, ChevronDown, ChevronUp } from 'lucide-react';
 
-const Outing = ({ id, name, description, userEmail, startTime, endTime, participants }) => {
+interface OutingProps {
+  name: string;
+  description: string;
+  userEmail: string;
+  startTime: string;
+  endTime: string;
+  participants: string[];
+}
+
+const Outing: React.FC<OutingProps> = ({ name, description, userEmail, startTime, endTime, participants }) => {
   const [showParticipants, setShowParticipants] = useState(false);
 
   const toggleParticipants = () => {
@@ -11,7 +20,7 @@ const Outing = ({ id, name, description, userEmail, startTime, endTime, particip
   };
 
   // Format the dates for display
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string) => {
     try {
       const date = new Date(dateString);
       return date.toLocaleString('en-US', {
@@ -22,6 +31,7 @@ const Outing = ({ id, name, description, userEmail, startTime, endTime, particip
         minute: '2-digit',
       });
     } catch (e) {
+      console.error('Error formatting date:', e);
       return dateString;
     }
   };

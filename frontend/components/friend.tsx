@@ -1,9 +1,16 @@
 "use client";
 
 import React from 'react';
-import { User, Calendar, Mail, Check, Plus } from 'lucide-react';
+import { User, Mail, Check, Plus } from 'lucide-react';
 
-const Friend = ({ name, email, isSelected, onClick }) => {
+interface FriendProps {
+  name: string;
+  email: string;
+  isSelected: boolean;
+  onClick: () => void;
+}
+
+const Friend: React.FC<FriendProps> = ({ name, email, isSelected, onClick }) => {
   return (
     <div 
       onClick={onClick}
