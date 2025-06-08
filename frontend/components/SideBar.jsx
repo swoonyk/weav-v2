@@ -8,7 +8,7 @@ import { useUser } from "@clerk/nextjs";
 
 const SideBar = () => {
   const { user } = useUser();
-  const [userData, setUserData] = useState(null);
+  const [, setUserData] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleSidebar = () => {
@@ -16,7 +16,7 @@ const SideBar = () => {
   };
 
   const navItems = [
-    { name: 'Home', path: '/home', icon: Home },
+    { name: 'Home', path: '/', icon: Home },
     { name: 'Friends', path: '/friends', icon: Users },
     { name: 'Events', path: '/events', icon: Calendar },
     { 

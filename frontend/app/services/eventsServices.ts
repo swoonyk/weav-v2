@@ -1,20 +1,34 @@
 import { PrismaClient } from '@prisma/client';
-import axios from 'axios'
 
-import { exec } from 'child_process';
-import { promisify } from 'util';
 import path from 'path';
-
-const execAsync = promisify(exec);
+import { prisma } from '@/lib/prisma';
 
 interface PythonResponse {
   success: boolean;
-  data: any;
+  data: object | null;
   error?: string;
 }
 
-export async function executePythonScript(inputData: any): Promise<PythonResponse> {
+export async function executePythonScript(inputData: object): Promise<PythonResponse> {
+  // In production (Vercel), we can't execute Python scripts
+  // Return mock data instead
+  if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
+    console.log('Running in production environment, returning mock data');
+    return {
+      success: true,
+      data: {
+        message: "This is mock data since Python execution is not available in production",
+        input: inputData
+      }
+    };
+  }
+  
+  // Only execute Python in development
   try {
+    const { exec } = await import('child_process');
+    const { promisify } = await import('util');
+    const execAsync = promisify(exec);
+    
     const scriptPath = path.join(process.cwd(), 'python', 'script.py');
     const jsonString = JSON.stringify(inputData).replace(/"/g, '\\"');
     const { stdout, stderr } = await execAsync(`python3 "${scriptPath}" "${jsonString}"`);
@@ -25,7 +39,7 @@ export async function executePythonScript(inputData: any): Promise<PythonRespons
 
     return {
       success: true,
-      data: JSON.parse(stdout)
+      data: JSON.parse(stdout) as object
     };
   } catch (error) {
     console.error('Python execution error:', error);
@@ -37,9 +51,7 @@ export async function executePythonScript(inputData: any): Promise<PythonRespons
   }
 }
 
-const prisma = new PrismaClient();
-
-const fetchEvents = async (userId: string) => {
+const fetchEvents = async (userId: string, eventId?: string) => {
   try {
     const userIdBigInt = BigInt(userId);
 
@@ -61,6 +73,8 @@ const fetchEvents = async (userId: string) => {
       }[]
     }[] = await prisma.event.findMany({
       where: {
+        // Only include eventId filter if it's provided
+        ...(eventId ? { id: BigInt(eventId) } : {}),
         OR: [
           // Events where user is creator
           { creator_id: userIdBigInt },
@@ -117,8 +131,6 @@ const fetchEvents = async (userId: string) => {
     throw new Error('Failed to fetch events');
   }
 };
-
-
 
 export {
   fetchEvents

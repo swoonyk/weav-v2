@@ -1,8 +1,7 @@
 {
-  "functions": {
-    "frontend/api/**/*.py": {
-      "runtime": "python3.9"
-    }
-  },
-  "root": "frontend"
+  "version": 2,
+  "buildCommand": "cd frontend && pnpm install && pnpm approve-builds @prisma/client @prisma/engines @clerk/shared @firebase/util core-js prisma protobufjs sharp unrs-resolver && pnpm postinstall && pnpm build",
+  "outputDirectory": "frontend/.next",
+  "installCommand": "cd frontend && pnpm install",
+  "rootDirectory": "frontend"
 } 

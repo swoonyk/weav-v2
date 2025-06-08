@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Authenticate the request
@@ -18,7 +18,7 @@ export async function GET(
     }
     
     // Extract the user ID from the URL parameters
-    const userId = params.id;
+    const { id } = await params;
     
     // Get the action type from the search parameters
     const searchParams = request.nextUrl.searchParams;
@@ -27,7 +27,7 @@ export async function GET(
     switch (action) {
       case 'profile': {
         // Fetch basic profile information
-        const profileData = await fetchUserProfile(userId);
+        const profileData = await fetchUserProfile(id);
         if (!profileData) {
           return NextResponse.json({ error: "User profile not found" }, { status: 404 });
         }
@@ -36,7 +36,7 @@ export async function GET(
 
       case 'friends': {
         // Fetch user's friend list
-        const friendsList = await fetchUserFriends(userId);
+        const friendsList = await fetchUserFriends(id);
         return NextResponse.json(friendsList || []);
       }
       

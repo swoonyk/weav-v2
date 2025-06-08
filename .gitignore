@@ -1,42 +1,105 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+# Dependencies
+node_modules/
+frontend/node_modules/
+.pnp
+.pnp.js
 
-# dependencies
-./frontend/node_modules/
+# Next.js
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/dist/
 
-# Expo
-./frontend/expo/
-./frontend/dist/
-./frontend/web-build/
-./frontend/expo-env.d.ts
+# Production builds
+*.tsbuildinfo
+next-env.d.ts
 
-# Native
-./frontend/*.orig.*
-./frontend/*.jks
-./frontend/*.p8
-./frontend/*.p12
-./frontend/*.key
-./frontend/*.mobileprovision
-
-# Metro
-./frontend/.metro-health-check*
-
-# debug
-./frontend/npm-debug.*
-./frontend/yarn-debug.*
-./frontend/yarn-error.*
-
-# macOS
-./frontend/.DS_Store
-./frontend/*.pem
-
-# local env files
-./frontend/.env*.local
-
-# typescript
-./frontend/*.tsbuildinfo
-
-# vercel
-.vercel
-
-# env
+# Environment variables
+.env
 .env*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Python virtual environment
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Deployment
+.vercel
+.netlify
+
+# TypeScript
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Prisma
+frontend/prisma/dev.db*
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Logs
+logs
+*.log
+
+# Certificate files
+*.pem
+*.key
+*.crt
+
+# Backup files
+*.backup
+*.bak

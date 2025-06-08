@@ -18,6 +18,7 @@ export async function POST(request: Request) {
       data: pythonResult.data
     });
   } catch (error) {
+    console.error('Error in POST /api/events:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
