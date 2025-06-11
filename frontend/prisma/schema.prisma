@@ -25,6 +25,7 @@ model User {
   friends_received     Friend[]            @relation("FriendUser")
   created_events      Event[]             @relation("EventCreator")
   participated_events EventParticipant[]
+  liked_events        UserEventLike[]
  
   @@map("users")
 }
@@ -46,11 +47,21 @@ model Event {
   description String
   start_time  DateTime
   end_time    DateTime
+  location    String?
+  price       String?
+  category    String?
+  imageUrl    String?
+  organizer   String?
+  attendeeCount Int?    @default(0)
+  maxAttendees  Int?
+  tags        String[] @default([])
+  isFree      Boolean @default(false)
   everyone_fw Boolean  @default(false)
  
   // Relations
   creator     User              @relation("EventCreator", fields: [creator_id], references: [id])
   participants EventParticipant[]
+  liked_by     UserEventLike[]
  
   @@map("events")
 }
@@ -65,4 +76,14 @@ model EventParticipant {
  
   @@id([event_id, user_id])
   @@map("event_participants")
+}
+
+model UserEventLike {
+  userId    BigInt
+  eventId   BigInt
+  user      User     @relation(fields: [userId], references: [id])
+  event     Event    @relation(fields: [eventId], references: [id])
+
+  @@id([userId, eventId])
+  @@map("user_event_likes")
 }

@@ -23,6 +23,16 @@ const config: Config = {
   			},
   			primary: {
   				DEFAULT: 'hsl(var(--primary))',
+  				50: 'hsl(142 76% 95%)',
+  				100: 'hsl(142 76% 90%)',
+  				200: 'hsl(142 76% 80%)',
+  				300: 'hsl(142 76% 70%)',
+  				400: 'hsl(142 76% 60%)',
+  				500: 'hsl(142 76% 50%)',
+  				600: 'hsl(142 76% 40%)',
+  				700: 'hsl(142 76% 30%)',
+  				800: 'hsl(142 76% 20%)',
+  				900: 'hsl(142 76% 10%)',
   				foreground: 'hsl(var(--primary-foreground))'
   			},
   			secondary: {

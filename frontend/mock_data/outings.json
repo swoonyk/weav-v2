@@ -1,26 +1,98 @@
 [
-    {
-      "creator": "912u09",
-      "name": "wpi",
-      "startTime": "1/25/2025",
-      "endTime": "1/26/2025",
-      "description": "wpi hackathon temp temp temp temp temp tem ptemp temp tempt emptemddd ptempte mptempt emp d dd d d d d d d d d dd d d d d d d d d d d d d d d d dd d d  d d d d  d d d  d d d d  d d  d d d d d  d d d d  d d d d  d d d d dd d d d  d d  d d  d d d  d d d d d d d d d d d  d d d d d  dd ",
-      "location": "worcester"
-    },
-    {
-      "creator": "12084109",
-      "name": "uconn",
-      "startTime": "1/25/2025",
-      "endTime": "1/26/2025",
-      "description": "spring semester",
-      "location": "storrs"
-    },
-    {
-      "creator": "1207912",
-      "name": "tristans dorm",
-      "startTime": "1/25/2025",
-      "endTime": "1/26/2025",
-      "description": "hispanic",
-      "location": "mexico"
-    }
-  ]
+  {
+    "id": "evt001",
+    "creator": "user_2aP5s1d8G3h4J6k7L9m0N1o2P3q",
+    "name": "Local Farmers Market",
+    "startTime": "2025-06-15T09:00:00Z",
+    "endTime": "2025-06-15T13:00:00Z",
+    "description": "Fresh produce, artisanal goods, and a friendly community atmosphere. Support local farmers and makers.",
+    "location": "Downtown Square",
+    "price": "Free",
+    "category": "Market",
+    "imageUrl": "/images/local-farmers-market.png.avif",
+    "organizer": "City Council",
+    "attendeeCount": 150,
+    "tags": ["organic", "local", "fresh"],
+    "isFree": true
+  },
+  {
+    "id": "evt002",
+    "creator": "user_2bK4t2e9H4i5J7l8M0n1O2p3Q4r",
+    "name": "Yoga in the Park",
+    "startTime": "2025-06-22T10:00:00Z",
+    "endTime": "2025-06-22T11:00:00Z",
+    "description": "Start your Sunday with a relaxing and rejuvenating yoga session in the open air. All levels welcome.",
+    "location": "Central Park",
+    "price": "$10",
+    "category": "Health & Wellness",
+    "imageUrl": "/images/yoga-in-the-park.avif",
+    "organizer": "Serene Yoga Studio",
+    "attendeeCount": 45,
+    "tags": ["yoga", "outdoors", "wellness"],
+    "isFree": false
+  },
+  {
+    "id": "evt003",
+    "creator": "user_2cL5u3f0I5j6K8m9N1o2P3q4R5s",
+    "name": "Tech Innovators Meetup",
+    "startTime": "2025-06-28T18:00:00Z",
+    "endTime": "2025-06-28T21:00:00Z",
+    "description": "Network with fellow tech enthusiasts, share ideas, and listen to talks from industry leaders.",
+    "location": "Innovation Hub",
+    "price": "Free",
+    "category": "Technology",
+    "imageUrl": "/images/tech-innovators-meetup.avif",
+    "organizer": "TechForward",
+    "attendeeCount": 85,
+    "tags": ["tech", "networking", "startup"],
+    "isFree": true
+  },
+  {
+    "id": "evt004",
+    "creator": "user_2dM6v4g1J6k7L9n0O1p2Q3r4S6t",
+    "name": "Live Music Night",
+    "startTime": "2025-07-05T20:00:00Z",
+    "endTime": "2025-07-05T23:00:00Z",
+    "description": "Enjoy an evening of live music from talented local bands. Great tunes, good vibes.",
+    "location": "The Sound Garden",
+    "price": "$15",
+    "category": "Music",
+    "imageUrl": "/images/live-music-night.avif",
+    "organizer": "Local Promotions",
+    "attendeeCount": 120,
+    "tags": ["live music", "bands", "local"],
+    "isFree": false
+  },
+  {
+    "id": "evt005",
+    "creator": "user_2eN7w5h2K7l8M0o1P2q3R4s5T7u",
+    "name": "Art Exhibition Opening",
+    "startTime": "2025-07-12T19:00:00Z",
+    "endTime": "2025-07-12T22:00:00Z",
+    "description": "Be the first to see the new collection from emerging contemporary artists. Wine and cheese will be served.",
+    "location": "Modern Art Gallery",
+    "price": "Free",
+    "category": "Arts",
+    "imageUrl": "/images/art-exhibition.avif",
+    "organizer": "MAG",
+    "attendeeCount": 200,
+    "tags": ["art", "exhibition", "contemporary"],
+    "isFree": true
+  },
+  {
+    "id": "evt006",
+    "creator": "user_2fO8x6i3L8m9N1p2Q3r4S5t6U8v",
+    "name": "Community Book Club",
+    "startTime": "2025-07-19T16:00:00Z",
+    "endTime": "2025-07-19T17:30:00Z",
+    "description": "Discuss this month's book, 'The Midnight Library', and meet other book lovers in your community.",
+    "location": "Public Library",
+    "price": "Free",
+    "category": "Literature",
+    "imageUrl": "/images/community-book-club.avif",
+    "organizer": "City Library",
+    "attendeeCount": 30,
+    "tags": ["books", "reading", "community"],
+    "isFree": true
+  }
+]

@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import ActiveLink from './ActiveLink';
 import { Calendar, Home, Users, User, Menu, X } from 'lucide-react';
-import { ThemeToggle } from './ThemeToggle';
 import { useUser } from "@clerk/nextjs";
 
 const SideBar = () => {
@@ -56,9 +55,6 @@ const SideBar = () => {
         <div className="flex flex-col h-full">
           <div className="p-4 border-b border-border flex justify-between items-center">
             <h1 className="text-2xl font-bold bg-clip-text text-transparent weav-gradient">weav</h1>
-            <div className="md:hidden">
-              <ThemeToggle />
-            </div>
           </div>
           
           <nav className="flex-grow overflow-y-auto p-4">
@@ -81,10 +77,6 @@ const SideBar = () => {
               })}
             </ul>
           </nav>
-          
-          <div className="p-4 border-t border-border hidden md:block">
-            <ThemeToggle />
-          </div>
         </div>
       </div>
 

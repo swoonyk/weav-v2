@@ -176,47 +176,57 @@ async function fetchUserFriends(userId: string) {
           { friend_id: userIdBigInt }
         ]
       },
-      select: {
-        user_id: true,
-        friend_id: true,
-        user: true,
-        friend: true
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            username: true,
+            email: true,
+            profilePic: true
+          }
+        },
+        friend: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            username: true,
+            email: true,
+            profilePic: true
+          }
+        }
       }
     });
 
-    // Find bidirectional friendships
-    const confirmedFriendIds = new Set<bigint>();
-    const friendPairs = new Map<string, Set<bigint>>();
-
-    friendships.forEach(friendship => {
-      const { user_id, friend_id } = friendship;
-      const key = `${user_id}-${friend_id}`;
-      const reverseKey = `${friend_id}-${user_id}`;
-
-      if (friendPairs.has(reverseKey)) {
-        confirmedFriendIds.add(user_id);
-        confirmedFriendIds.add(friend_id);
+    const friendDetails = friendships.map(fs => {
+      if (fs.user_id === userIdBigInt) {
+        // Current user is the initiator, return details of the friend
+        return {
+          id: fs.friend.id.toString(),
+          firstName: fs.friend.firstName,
+          lastName: fs.friend.lastName,
+          username: fs.friend.username,
+          email: fs.friend.email,
+          profilePic: fs.friend.profilePic,
+          status: fs.user_id === userIdBigInt && fs.friend_id === userIdBigInt ? 'confirmed' : 'pending_sent'
+        };
       } else {
-        friendPairs.set(key, new Set([user_id, friend_id]));
+        // Current user is the receiver, return details of the user who sent the request
+        return {
+          id: fs.user.id.toString(),
+          firstName: fs.user.firstName,
+          lastName: fs.user.lastName,
+          username: fs.user.username,
+          email: fs.user.email,
+          profilePic: fs.user.profilePic,
+          status: 'pending_received'
+        };
       }
     });
 
-    // Fetch user details for confirmed friends
-    const confirmedFriends = await prisma.user.findMany({
-      where: {
-        id: { in: Array.from(confirmedFriendIds) }
-      },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        username: true,
-        email: true,
-        profilePic: true
-      }
-    });
-
-    return confirmedFriends;
+    return friendDetails;
   } catch (error) {
     console.error('Error fetching friends:', error);
     throw error;
