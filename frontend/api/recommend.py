@@ -18,29 +18,59 @@ GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')
 
 genai.configure(api_key=GEMINI_API_KEY)
 
-def get_event_info(event_id):
-    url = f'https://www.eventbriteapi.com/v3/events/{event_id}/'
+def get_event_details(event_id):
+    url = f'https://www.eventbriteapi.com/v3/events/{event_id}/?expand=venue,category,format,ticket_classes,logo,tags'
     headers = {'Authorization': f'Bearer {OAUTH_TOKEN}'}
     response = requests.get(url, headers=headers)
     if response.status_code == 200:
         event_data = response.json()
-        return [
-            event_data.get("url"),
-            event_data.get("start", {}).get("utc"),
-            event_data.get("end", {}).get("utc")
-        ]
-    return None
+        
+        # Extracting relevant information
+        name = event_data.get("name", {}).get("text", "No Title")
+        description = event_data.get("description", {}).get("text", "No Description")
+        start_time_utc = event_data.get("start", {}).get("utc")
+        end_time_utc = event_data.get("end", {}).get("utc")
+        url = event_data.get("url")
+        image_url = event_data.get("logo", {}).get("url", '/default-event-image.jpg')
+        location = event_data.get("venue", {}).get("address", {}).get("localized_address_display", "Online or TBD")
+        category = event_data.get("category", {}).get("short_name", "General")
+        
+        # Price determination
+        is_free = event_data.get("is_free", False)
+        price = "Free" if is_free else "Paid";
+        
+        # Tags
+        tags = [tag.get('display_name') for tag in event_data.get('tags', []) if tag.get('display_name')]
 
-def get_event_description(event_id):
-    url = f'https://www.eventbriteapi.com/v3/events/{event_id}/'
-    headers = {'Authorization': f'Bearer {OAUTH_TOKEN}'}
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        event_data = response.json()
-        return [
-            event_data.get("name", {}).get("text"),
-            event_data.get("description", {}).get("text")
-        ]
+        # Organizer (using top-level organizer ID, may need to fetch organizer details if more info needed)
+        organizer_id = event_data.get("organizer_id")
+        organizer_name = "Eventbrite Organizer" # Default
+        if organizer_id:
+            # In a real app, you might fetch organizer details here
+            # For now, we'll keep it simple
+            pass
+
+        # Attendee count (mocked or derived if available from API)
+        attendee_count = event_data.get("ticket_classes", [])[0].get("quantity_sold", 0) if event_data.get("ticket_classes") else 0;
+        max_attendees = event_data.get("capacity") # Assuming capacity field exists
+
+        return {
+            "id": event_id,
+            "name": name,
+            "description": description,
+            "startTime": start_time_utc,
+            "endTime": end_time_utc,
+            "location": location,
+            "price": price,
+            "category": category,
+            "imageUrl": image_url,
+            "organizer": organizer_name,
+            "attendeeCount": attendee_count,
+            "maxAttendees": max_attendees,
+            "tags": tags,
+            "isFree": is_free,
+            "url": url
+        }
     return None
 
 def get_from_url(pg):
@@ -64,8 +94,8 @@ def get_full_list_of_ids():
 
 def return_csv_data():
     event_ids = get_full_list_of_ids()
-    event_info_list = [get_event_info(id) for id in event_ids]
-    return [info for info in event_info_list if info and all(info)]
+    event_details_list = [get_event_details(id) for id in event_ids]
+    return [details for details in event_details_list if details and all(details.values())]
 
 def find_free_time_slots(events, overall_start, overall_end):
     free_slots = []
@@ -121,8 +151,9 @@ def main_handler(json_data):
     
     suitable_events = []
     for event in eventbrite_events:
-        if is_event_in_free_slot(event[1], event[2], free_slots):
-            suitable_events.append(event[0]) # event[0] is the URL
+        # Here, `event` is a dictionary with full event details
+        if is_event_in_free_slot(event['startTime'], event['endTime'], free_slots):
+            suitable_events.append(event) # Append the full event dictionary
             
     # AI-based scoring would go here if preferences are provided
     # For now, just returning events that fit the schedule

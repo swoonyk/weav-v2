@@ -1,137 +1,87 @@
-import { PrismaClient } from '@prisma/client';
-
+import fs from 'fs';
 import path from 'path';
 import { prisma } from '@/lib/prisma';
+import { Event as EventType } from '@/lib/types';
 
-interface PythonResponse {
-  success: boolean;
-  data: object | null;
-  error?: string;
-}
-
-export async function executePythonScript(inputData: object): Promise<PythonResponse> {
-  // In production (Vercel), we can't execute Python scripts
-  // Return mock data instead
-  if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
-    console.log('Running in production environment, returning mock data');
-    return {
-      success: true,
-      data: {
-        message: "This is mock data since Python execution is not available in production",
-        input: inputData
-      }
-    };
-  }
-  
-  // Only execute Python in development
+const fetchEvents = async (/* userId: string, */ eventId?: string) => {
   try {
-    const { exec } = await import('child_process');
-    const { promisify } = await import('util');
-    const execAsync = promisify(exec);
-    
-    const scriptPath = path.join(process.cwd(), 'python', 'script.py');
-    const jsonString = JSON.stringify(inputData).replace(/"/g, '\\"');
-    const { stdout, stderr } = await execAsync(`python3 "${scriptPath}" "${jsonString}"`);
-    
-    if (stderr) {
-      throw new Error(stderr);
-    }
+    // Construct the path to the mock data file
+    const filePath = path.join(process.cwd(), 'mock_data', 'outings.json');
+    // Read the file content
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    // Parse the JSON content
+    const eventsData: EventType[] = JSON.parse(fileContent);
 
-    return {
-      success: true,
-      data: JSON.parse(stdout) as object
-    };
-  } catch (error) {
-    console.error('Python execution error:', error);
-    return {
-      success: false,
-      data: null,
-      error: error instanceof Error ? error.message : 'Unknown error'
-    };
-  }
-}
-
-const fetchEvents = async (userId: string, eventId?: string) => {
-  try {
-    const userIdBigInt = BigInt(userId);
-
-    const events: {
-      id: bigint,
-      title: string,
-      description: string,
-      start_time: Date,
-      end_time: Date,
-      creator: {
-        email: string
-      },
-      participants: {
-        user: {
-          email: string,
-          firstName: string,
-          lastName: string
-        }
-      }[]
-    }[] = await prisma.event.findMany({
-      where: {
-        // Only include eventId filter if it's provided
-        ...(eventId ? { id: BigInt(eventId) } : {}),
-        OR: [
-          // Events where user is creator
-          { creator_id: userIdBigInt },
-          // Events where user is participant
-          {
-            participants: {
-              some: {
-                user_id: userIdBigInt
-              }
-            }
-          }
-        ]
-      },
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        start_time: true,
-        end_time: true,
-        creator: {
-          select: {
-            email: true
-          }
-        },
-        participants: {
-          select: {
-            user: {
-              select: {
-                email: true,
-                firstName: true,
-                lastName: true
-              }
-            }
-          }
-        }
-      }
-    });
-
-    return events.map(event => ({
-      eventId: event.id.toString(),
-      title: event.title,
-      description: event.description,
-      startTime: event.start_time,
-      endTime: event.end_time,
-      creatorEmail: event.creator.email,
-      participants: event.participants.map(p => ({
-        email: p.user.email,
-        name: `${p.user.firstName} ${p.user.lastName}`
-      }))
+    // Map the data to ensure it conforms to the EventType, assuming the structure is compatible
+    const events: EventType[] = eventsData.map((event) => ({
+      ...event,
+      // Ensure all fields from EventType are present, with defaults if necessary
+      id: event.id || '',
+      name: event.name || 'No Name',
+      description: event.description || 'No Description',
+      startTime: event.startTime || new Date().toISOString(),
+      endTime: event.endTime || new Date().toISOString(),
+      location: event.location || 'No Location',
+      price: event.price || 'Free',
+      category: event.category || 'General',
+      imageUrl: event.imageUrl || '',
+      organizer: event.organizer || 'Unknown',
+      attendeeCount: event.attendeeCount || 0,
+      tags: event.tags || [],
+      isFree: event.isFree === undefined ? true : event.isFree,
     }));
 
+    console.log('Fetched events from mock data:', events);
+
+    return events;
   } catch (error) {
-    console.error('Error fetching events:', error);
+    console.error('Error fetching events from mock data:', error);
     throw new Error('Failed to fetch events');
   }
 };
 
+async function toggleEventLike(userId: string, eventId: string) {
+  try {
+    const userIdBigInt = BigInt(userId);
+    const eventIdBigInt = BigInt(eventId);
+
+    const existingLike = await prisma.userEventLike.findUnique({
+      where: {
+        userId_eventId: {
+          userId: userIdBigInt,
+          eventId: eventIdBigInt,
+        },
+      },
+    });
+
+    if (existingLike) {
+      // Unlike the event
+      await prisma.userEventLike.delete({
+        where: {
+          userId_eventId: {
+            userId: userIdBigInt,
+            eventId: eventIdBigInt,
+          },
+        },
+      });
+      return { isLiked: false };
+    } else {
+      // Like the event
+      await prisma.userEventLike.create({
+        data: {
+          userId: userIdBigInt,
+          eventId: eventIdBigInt,
+        },
+      });
+      return { isLiked: true };
+    }
+  } catch (error) {
+    console.error('Error toggling event like:', error);
+    throw new Error('Failed to toggle event like');
+  }
+}
+
 export {
-  fetchEvents
+  fetchEvents,
+  toggleEventLike
 }

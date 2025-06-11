@@ -1,270 +1,115 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { useUser } from "@clerk/nextjs";
-import Header from '@/components/Header';
-import Friend from '@/components/friend';
-import Outing from '@/components/Outing';
-import { CalendarPlus, Users, X } from 'lucide-react';
-
-interface FriendType {
-  name: string;
-  email: string;
-}
-
-interface OutingType {
-  id: string;
-  name: string;
-  description: string;
-  userEmail: string;
-  startTime: string;
-  endTime: string;
-  participants: string[];
-}
-
-interface UserDataType {
-  email: string | undefined;
-}
+import React from 'react';
+import { useRouter } from 'next/navigation';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import Image from 'next/image';
 
 const HomePage = () => {
-  const { user } = useUser();
-  const [friends, setFriends] = useState<FriendType[]>([]);
-  const [selectedFriends, setSelectedFriends] = useState<FriendType[]>([]);
-  const [recommendedEvents, setRecommendedEvents] = useState<OutingType[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [userData, setUserData] = useState<UserDataType | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
 
-  // Mock outings for demonstration
-  const mockOutings: OutingType[] = [
-    {
-      id: '1',
-      name: 'Weekend Hike',
-      description: 'Trail hike at the national park',
-      userEmail: 'user@example.com',
-      startTime: '2023-07-22T09:00:00',
-      endTime: '2023-07-22T15:00:00',
-      participants: ['alex@example.com', 'maria@example.com', 'john@example.com']
-    },
-    {
-      id: '2',
-      name: 'Dinner Party',
-      description: 'Italian dinner at Mario\'s',
-      userEmail: 'user@example.com',
-      startTime: '2023-07-25T19:00:00',
-      endTime: '2023-07-25T22:00:00',
-      participants: ['sam@example.com', 'taylor@example.com']
-    }
-  ];
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (user) {
-        try {
-          // This should be an API call to your backend to get user details, including friends
-          // For now, using mock friends
-          const mockFriends: FriendType[] = [
-            { name: "Alex Johnson", email: "alex@example.com" }, 
-            { name: "Maria Garcia", email: "maria@example.com" },
-            { name: "John Smith", email: "john@example.com" },
-            { name: "Sam Taylor", email: "sam@example.com" },
-            { name: "Taylor Swift", email: "taylor@example.com" }
-          ];
-          setFriends(mockFriends);
-          setUserData({ email: user.primaryEmailAddress?.emailAddress });
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-        }
-      }
-    };
-    fetchUserData();
-  }, [user]);
-
-  const handleFriendClick = (friend: FriendType) => {
-    setSelectedFriends((prevSelectedFriends) => {
-      if (prevSelectedFriends.some(f => f.email === friend.email)) {
-        return prevSelectedFriends.filter((f) => f.email !== friend.email);
-      } else {
-        return [...prevSelectedFriends, friend];
-      }
-    });
+  const handleGetStartedClick = () => {
+    router.push('/events');
   };
 
-  const toggleModal = () => {
-    setIsModalOpen(!isModalOpen);
-    if (!isModalOpen) {
-      setSelectedFriends([]);
-    }
+  const handleLearnMoreClick = () => {
+    router.push('/');
   };
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!user) {
-      console.error("You must be logged in to plan an event.");
-      return;
-    }
-    setIsLoading(true);
-
-    // Assuming friends' emails are their calendar IDs for Google Calendar
-    const calendarIds = [userData?.email, ...selectedFriends.map(f => f.email)];
-
-    const payload = {
-      calendars: calendarIds,
-      preferences: {}, // Preferences can be added later
-    };
-
-    try {
-      // Mock API call - replace with actual API call
-      console.log("Sending payload:", payload);
-      
-      // Mock response after 1 second
-      setTimeout(() => {
-        setRecommendedEvents(mockOutings);
-        setIsLoading(false);
-        toggleModal();
-      }, 1000);
-      
-      // Actual API call would look like this:
-      /*
-      const response = await fetch('/api/recommend', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error || 'Failed to fetch recommendations.');
-      }
-
-      const data = await response.json();
-      setRecommendedEvents(data.recommended_events || []);
-      setIsLoading(false);
-      toggleModal();
-      */
-    } catch (error) {
-      console.error('Error:', error);
-      setIsLoading(false);
-    }
-  };
-  
   return (
-    <div className="page-container">
-      <Header />
+    <div className="relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/5 dark:from-primary/10 dark:to-background z-0"></div>
       
-      {/* Plan Wevent Button */}
-      <div className="container-fluid mt-8">
-        <div className="flex justify-between items-center">
-          <h2 className="text-3xl font-bold">Your Wevents</h2>
-          <button
-            onClick={toggleModal}
-            className="btn btn-primary flex items-center gap-2"
-          >
-            <CalendarPlus className="h-5 w-5" />
-            <span>Plan Wevent</span>
-          </button>
-        </div>
-        
-        {/* Outings List */}
-        <div className="mt-8">
-          {recommendedEvents.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {recommendedEvents.map((event) => (
-                <Outing key={event.id} {...event} />
-              ))}
-            </div>
-          ) : (
-            <div className="card p-8 text-center">
-              <h3 className="text-xl font-medium mb-4">No Wevents Planned Yet</h3>
-              <p className="text-muted-foreground mb-6">
-                Start planning your first Wevent by clicking the &quot;Plan Wevent&quot; button.
-              </p>
-              <button
-                onClick={toggleModal}
-                className="btn btn-primary mx-auto"
-              >
-                Plan Your First Wevent
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-      
-      {/* Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/20 backdrop-blur-sm">
-          <div className="card w-full max-w-3xl max-h-[90vh] overflow-auto">
-            <div className="card-header flex justify-between items-center">
-              <h2 className="text-2xl font-bold">Plan Your Wevent</h2>
-              <button 
-                onClick={toggleModal}
-                className="p-2 rounded-full hover:bg-secondary/80"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
+      <section className="relative z-10 py-16 md:py-24 container-fluid">
+        <div className="max-w-7xl mx-auto flex flex-col items-center">
+          <div className="absolute top-4 right-4">
+            <ThemeToggle />
+          </div>
+          
+          <div className="text-center">
+            <h1 className="text-6xl md:text-8xl font-bold bg-clip-text text-transparent weav-gradient">
+              weav
+            </h1>
+            <p className="my-6 text-xl md:text-2xl text-foreground/80 max-w-2xl mx-auto">
+              Sync your calendar with others in realtime, simplifying planning for your next outing!
+            </p>
             
-            <div className="card-content">
-              <h3 className="text-lg font-medium mb-4">Select Friends</h3>
-              
-              {/* Friends List */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-                {friends.map((friend) => (
-                  <Friend
-                    key={friend.email}
-                    name={friend.name}
-                    email={friend.email}
-                    isSelected={selectedFriends.some(f => f.email === friend.email)}
-                    onClick={() => handleFriendClick(friend)}
-                  />
-                ))}
-              </div>
-              
-              {/* Selected Friends Summary */}
-              {selectedFriends.length > 0 && (
-                <div className="mt-6 p-4 bg-secondary/50 rounded-lg">
-                  <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
-                    <Users className="h-4 w-4" />
-                    <span>{selectedFriends.length} Friends Selected</span>
-                  </h4>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedFriends.map(friend => (
-                      <div 
-                        key={friend.email}
-                        className="bg-background px-3 py-1 rounded-full text-sm flex items-center gap-1"
-                      >
-                        <span>{friend.name}</span>
-                        <button 
-                          onClick={() => handleFriendClick(friend)}
-                          className="text-muted-foreground hover:text-destructive"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            <div className="card-footer flex-between border-t">
-              <button 
-                onClick={toggleModal}
-                className="btn btn-outline"
-              >
-                Cancel
+            <div className="flex flex-wrap justify-center gap-4 mt-8">
+              <button className="btn btn-primary" onClick={handleGetStartedClick}>
+                Get Started
               </button>
-              <button
-                onClick={handleSubmit}
-                className="btn btn-primary"
-                disabled={isLoading || selectedFriends.length === 0}
-              >
-                {isLoading ? 'Weaving...' : 'Weav Your Outing'}
+              <button className="btn btn-outline" onClick={handleLearnMoreClick}>
+                Learn More
               </button>
             </div>
           </div>
         </div>
-      )}
+      </section>
+
+      {/* Feature Section 1: Real-time Calendar Sync */}
+      <section className="relative z-10 py-16 md:py-24 container-fluid bg-gradient-to-r from-green-50 to-emerald-50 dark:from-gray-800 dark:to-gray-900">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between px-4">
+          <div className="md:w-1/2 text-center md:text-left mb-10 md:mb-0">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+              Sync Calendars <span className="text-primary-600 dark:text-primary-400">Effortlessly</span>
+            </h2>
+            <p className="text-lg md:text-xl text-gray-700 dark:text-gray-300 max-w-lg md:mx-0 mx-auto">
+              Weav brings all your calendars together in real-time, ensuring you're always in sync with your friends and never miss out on an event. Say goodbye to endless group chats and hello to seamless coordination.
+            </p>
+          </div>
+          <div className="md:w-1/2 flex justify-center">
+            <div className="relative w-full max-w-md h-64 md:h-80 bg-gray-200 dark:bg-gray-700 rounded-lg shadow-xl overflow-hidden flex items-center justify-center">
+              <Image 
+                src="/images/calendar-sync.png" 
+                alt="Calendar Sync" 
+                layout="fill" 
+                objectFit="cover"
+                className="rounded-lg"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Feature Section 2: Simplified Planning */}
+      <section className="relative z-10 py-16 md:py-24 container-fluid">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row-reverse items-center justify-between px-4">
+          <div className="md:w-1/2 text-center md:text-left mb-10 md:mb-0">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+              Plan Your Next Outing <span className="text-primary-600 dark:text-primary-400">with Ease</span>
+            </h2>
+            <p className="text-lg md:text-xl text-gray-700 dark:text-gray-300 max-w-lg md:mx-0 mx-auto">
+              From casual meetups to grand adventures, Weav simplifies every step of event planning. Discover relevant events, invite friends, and coordinate logistics, all within one intuitive platform.
+            </p>
+          </div>
+          <div className="md:w-1/2 flex justify-center">
+            <div className="relative w-full max-w-md h-64 md:h-80 bg-gray-200 dark:bg-gray-700 rounded-lg shadow-xl overflow-hidden flex items-center justify-center">
+              <Image
+                src="/images/event-planning.png"
+                alt="Event Planning"
+                layout="fill"
+                objectFit="cover"
+                className="rounded-lg"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Call to Action Section */}
+      <section className="relative z-10 py-16 md:py-24 bg-gradient-to-r from-primary-600 to-primary-800 text-white">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+            Ready to <span className="text-white">Weav Your Social Life?</span>
+          </h2>
+          <p className="text-lg md:text-xl max-w-3xl mx-auto mb-10 opacity-90">
+            Join the growing community of Weav users who are transforming the way they connect and plan. It's free, fast, and fun!
+          </p>
+          <button className="bg-white text-primary-700 hover:bg-gray-100 font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1" onClick={() => router.push('/events')}>
+            Join Weav Today
+          </button>
+        </div>
+      </section>
     </div>
   );
 };

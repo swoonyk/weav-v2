@@ -7,7 +7,10 @@ interface Friend {
   id: string;
   firstName: string;
   lastName: string;
+  username: string;
   email: string;
+  profilePic?: string;
+  status: 'confirmed' | 'pending_sent' | 'pending_received';
 }
 
 interface NewFriend {
@@ -21,7 +24,7 @@ const FriendPage = () => {
   const { getToken } = useAuth();
   const { isLoaded, user } = useUser();
 
-  const postFriendData = async (newFriend: NewFriend): Promise<Friend> => {
+  const postFriendData = async (newFriend: NewFriend): Promise<{ success: boolean; error?: string }> => {
     try {
       const token = await getToken();
       
@@ -34,12 +37,14 @@ const FriendPage = () => {
         body: JSON.stringify(newFriend),
       });
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        const errorData = await response.json();
+        return { success: false, error: errorData.error || 'Failed to add friend' };
       }
-      return await response.json();
-    } catch (error) {
+      // No need to parse response.json() if it only returns { success: true }
+      return { success: true };
+    } catch (error: unknown) {
       console.error('Error adding friend:', error);
-      throw error;
+      return { success: false, error: error instanceof Error ? error.message : 'An unknown error occurred' };
     }
   };
 
@@ -87,12 +92,17 @@ const FriendPage = () => {
       targetEmail: newFriendEmail 
     };
     try {
-      const addedFriend: Friend = await postFriendData(newFriend);
-      setFriends([...friends, addedFriend]);
-      setNewFriendEmail('');
-      (document.getElementById('my_modal_1') as HTMLDialogElement)?.close();
+      const response = await postFriendData(newFriend);
+      if (response.success) {
+        // Assuming postFriendData returns enough info to create a Friend object or we refetch
+        // For simplicity, let's refetch all friends to update the list with statuses
+        getFriendData(); 
+        setNewFriendEmail('');
+        (document.getElementById('my_modal_1') as HTMLDialogElement)?.close();
+      } else {
+        console.error("Failed to add friend:", response.error);
+      }
     } catch (error) {
-      // Handle error if needed
       console.error('Error adding friend:', error);
     }
   };
@@ -143,8 +153,9 @@ const FriendPage = () => {
                 friends.map((friend, index) => (
                   <div key={index} className="card bg-white shadow-lg rounded-lg overflow-hidden">
                     <div className="p-6">
-                      <h3 className="font-bold text-xl mb-2">{friend.firstName} {friend.lastName}</h3>
+                      <h3 className="font-bold text-xl mb-2">{friend.firstName} {friend.lastName} ({friend.username})</h3>
                       <p className="text-gray-700">{friend.email}</p>
+                      <p className="text-sm text-gray-500">Status: {friend.status}</p>
                     </div>
                   </div>
                 ))
@@ -161,7 +172,7 @@ const FriendPage = () => {
               className="modal"
             >
               <div 
-                className="modal-box bg-gray-200 p-6 rounded-md shadow-lg"
+                className="modal-box bg-gray-200 p-6 rounded-md shadow-lg bg-opacity-100"
               >
                 <h3 className="font-bold text-lg text-emerald-500">
                   Add Friend
